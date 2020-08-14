@@ -1,17 +1,20 @@
 import * as R from 'ramda';
-import {sidepipe} from './index'
+import {sidepipe, sidepipeSync} from './index'
 
 const sum = R.curry((x, y) => x + y);
 const increment = x => x + 1;
 
-test("sidepipe returns obj with Content-Type", () => {
-  const myPipe = sidepipe(
-    ['z', sum, 'x', 'y'],
-    increment,
-    [sum, 'x']
-  );
+const pipeline = [ ['z', sum, 'x', 'y'], increment, [sum, 'x'] ];
 
-  myPipe(2, 3);
+test("sidepipe calculates correctly", () => {
+  const myPipe = sidepipe(...pipeline);
+  expect(myPipe(2, 3)).resolves.toEqual(8);
+});
+
+test("sidepipeSync calculates correctly", () => {
+  const myPipe = sidepipeSync(
+    ['z', sum, 'x', 'y'], increment, [sum, 'x']
+  );
   expect(myPipe(2, 3)).toEqual(8);
 });
 

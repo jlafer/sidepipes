@@ -1,5 +1,5 @@
-import {sidepipe} from './sidepipe';
+import {sidepipe, sidepipeSync} from './sidepipe';
 
 export {
-  sidepipe
+  sidepipe, sidepipeSync
 }
