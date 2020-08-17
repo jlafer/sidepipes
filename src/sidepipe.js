@@ -1,30 +1,16 @@
 import * as R from 'ramda';
+import {validate} from './validation';
+import {getFnComponents} from './helpers';
 
-const getResultFnAndArgs = (fnArr) => {
-  const fnIdx = (typeof fnArr[1] === 'function') ? 1 : 0;
-  const fFn = fnArr[fnIdx];
-  const resName = (fnIdx === 1) ? fnArr[0] : null;
-  const argNames = fnArr.slice(fnIdx+1);
-  return [resName, fFn, argNames];
-};
-
-const getFnComponents = (fn) => {
-  //console.log('getFnComponents: parsing:', fn);
-  let result;
-  if (Array.isArray(fn)) {
-    //console.log('getFnComponents: it is an array');
-    result = getResultFnAndArgs(fn);
+const _sidepipe = (isAsync, fns) => {
+  const FN_NAME = isAsync ? 'sidepipe' : 'sidepipeSync';
+  const validation = validate(fns);
+  if ('ERROR' in validation) {
+    console.error(`${FN_NAME}: invalid input:`, validation.ERROR);
+    return validation;
   }
-  else {
-    //console.log('getFnComponents: it is NOT an array');
-    result = [null, fn, []]
-  }
-  //console.log('getFnComponents: returning:', result);
-  return result;
-};
 
-const _sidepipe = (isAsync, fns) =>
-  (...args) => {
+  return (...args) => {
     //console.log('sidepipe: functions:', fns);
     const fn1 = R.head(fns);
     const [_resName, _fFn, argNames] = getFnComponents(fn1);
@@ -52,6 +38,7 @@ const _sidepipe = (isAsync, fns) =>
       accum
     )['input'][0];
   };
+};
 
 const IS_ASYNC = true;
 const IS_SYNC = false;
