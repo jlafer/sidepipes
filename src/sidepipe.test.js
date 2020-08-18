@@ -18,6 +18,11 @@ test("sidepipe works with a single n-ary function that returns a promise", () =>
   expect(myPipe(21, 21)).resolves.toEqual(42);
 });
 
+test("sidepipe works with a single function without named arguments", () => {
+  const myPipe = sidepipe([sumP]);
+  expect(myPipe(21, 21)).resolves.toEqual(42);
+});
+
 const mixedPipe = [ ['z', sumP, 'x', 'y'], increment, [sumP, 'x'] ];
 test("sidepipe calculates correctly with mix of promises and synchronous", () => {
   const myPipe = sidepipe(...mixedPipe);
