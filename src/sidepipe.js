@@ -1,6 +1,6 @@
 import * as R from 'ramda';
 import {validate} from './validation';
-import {getFnComponents} from './helpers';
+import {parsePipeSegment} from './helpers';
 
 const _sidepipe = (isAsync, fns) => {
   const FN_NAME = isAsync ? 'sidepipe' : 'sidepipeSync';
@@ -9,33 +9,25 @@ const _sidepipe = (isAsync, fns) => {
     console.error(`${FN_NAME}: invalid arguments:`, validation.ERROR);
     return validation;
   }
+  const fn1 = R.head(fns);
+  const {argNames} = parsePipeSegment(fn1);
 
   return (...args) => {
-    //console.log(`${FN_NAME}: functions:`, fns);
-    const fn1 = R.head(fns);
-    const {argNames} = getFnComponents(fn1);
-    const sideData = R.zipObj(argNames, args);
-    const pipeData = args;
-    const accum = {sideData, pipeData}
+    const initialSideData = R.zipObj(argNames, args);
+    const fluid = {sideData: initialSideData, pipeData: args};
     return fns.reduce(
-      (accum, fn, idx) => {
-        const {sideData, pipeData} = accum;;
-        //console.log(`${FN_NAME}: sideData:`, sideData);
-        //console.log(`${FN_NAME}: pipeData:`, pipeData);
-        const {resName, fFn, argNames} = getFnComponents(fn);
+      (fluid, pipeSegment, idx) => {
+        const {sideData, pipeData} = fluid;;
+        const {resName, fn, argNames} = parsePipeSegment(pipeSegment);
         const sideArgs = (idx == 0) ? [] : R.props(argNames, sideData);
         const allArgs = [...sideArgs, ...pipeData];
-        //console.log(`${FN_NAME}: allArgs:`, allArgs);
         const result = isAsync
-          ? Promise.all(allArgs).then(args => fFn(...args))
-          : fFn.call(null, ...allArgs);
-        //console.log(`${FN_NAME}: result:`, result);
-        const latestData = {...sideData};
-        if (resName)
-          latestData[resName] = result;
-        return {sideData: latestData, pipeData: [result]};
+          ? Promise.all(allArgs).then(args => fn(...args))
+          : fn.call(null, ...allArgs);
+        const newSideData = resName ? R.assoc(resName, result, sideData) : sideData;
+        return {sideData: newSideData, pipeData: [result]};
       },
-      accum
+      fluid
     )['pipeData'][0];
   };
 };

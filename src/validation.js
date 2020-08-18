@@ -1,5 +1,5 @@
 import * as R from 'ramda';
-import {getFnComponents} from './helpers';
+import {parsePipeSegment} from './helpers';
 
 const makeError = (message, data) => ({'ERROR': {message, data}});
 
@@ -14,7 +14,7 @@ const validateFnArrDataTypes = (accum, fnArr) => {
     return makeError('argument must contain a function in 1st or 2nd position', fnArr);
   if (R.any(notAFunctionOrString, fnArr))
     return makeError('argument must contain a function and only strings', fnArr);
-  const fnComponents = getFnComponents(fnArr);
+  const fnComponents = parsePipeSegment(fnArr);
   return {fns: [...accum.fns, fnComponents]};
 };
 
@@ -26,7 +26,7 @@ const validateArgsDefinedBeforeUse = (accum, fnComponents) => {
   const undefinedArg = R.find(nameNotInArgs(accum.args), fnComponents.argNames);
   console.log('validateArgsDefinedBeforeUse: undefinedArg', undefinedArg);
   if (undefinedArg)
-    return makeError(`${undefinedArg} is used before defined`, fnComponents);
+    return makeError(`${undefinedArg} is used before being defined`, fnComponents);
   if (fnComponents.resName) {
     const accumArgs = [...accum.args, fnComponents.resName];
     return R.assoc('args', accumArgs, accum);
@@ -34,17 +34,17 @@ const validateArgsDefinedBeforeUse = (accum, fnComponents) => {
   return accum;
 };
 
-const validateDataTypes = (accum, fn) => {
+const validateDataTypes = (accum, pipeSegment) => {
   if (accum.ERROR)
     return accum;
-  if (typeof fn == 'function') {
-    const fnComponents = getFnComponents(fn);
+  if (typeof pipeSegment == 'function') {
+    const fnComponents = parsePipeSegment(pipeSegment);
     return {fns: [...accum.fns, fnComponents]};
   }
-  if (Array.isArray(fn))
-    return validateFnArrDataTypes(accum, fn);
+  if (Array.isArray(pipeSegment))
+    return validateFnArrDataTypes(accum, pipeSegment);
   else
-    return makeError('argument must be a function or array [ret, fn, args]:', fn);
+    return makeError('argument must be a function or array [ret, fn, args]:', pipeSegment);
 };
 
 export const validate = (fns) => {

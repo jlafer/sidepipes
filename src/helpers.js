@@ -1,14 +1,14 @@
 import * as R from 'ramda';
 
 const getResultFnAndArgs = (fnArr) => {
-  const fnIdx = R.findIndex(item => typeof item === 'function', fnArr);
-  const fFn = fnArr[fnIdx];
-  const resName = (fnIdx === 1) ? fnArr[0] : null;
-  const argNames = fnArr.slice(fnIdx+1);
-  return {resName, fFn, argNames};
+  const [resNameList, fnAndArgs] = R.splitWhen(item => typeof item === 'function', fnArr);
+  const resName = R.head(resNameList);
+  const fn = R.head(fnAndArgs);
+  const argNames = R.tail(fnAndArgs);
+  return {resName, fn, argNames};
 };
 
-export const getFnComponents = (fn) =>
-  (Array.isArray(fn))
-  ? getResultFnAndArgs(fn)
-  : {resName: null, fFn: fn, argNames: []};
+export const parsePipeSegment = (pipeSegment) =>
+  (Array.isArray(pipeSegment))
+  ? getResultFnAndArgs(pipeSegment)
+  : {resName: null, fn: pipeSegment, argNames: []};
