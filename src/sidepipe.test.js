@@ -23,7 +23,12 @@ test("sidepipe works with a single function without named arguments", () => {
   expect(myPipe(21, 21)).resolves.toEqual(42);
 });
 
-const mixedPipe = [ ['z', sumP, 'x', 'y'], increment, [sumP, 'x'] ];
+const mixedPipe = [
+  [sumP, 'x', 'y'],
+  increment,
+  [sumP, 'x']
+];
+
 test("sidepipe calculates correctly with mix of promises and synchronous", () => {
   const myPipe = sidepipe(...mixedPipe);
   expect(myPipe(2, 3)).resolves.toEqual(8);
