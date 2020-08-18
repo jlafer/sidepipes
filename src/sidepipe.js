@@ -13,7 +13,7 @@ const _sidepipe = (isAsync, fns) => {
   return (...args) => {
     //console.log('sidepipe: functions:', fns);
     const fn1 = R.head(fns);
-    const [_resName, _fFn, argNames] = getFnComponents(fn1);
+    const {argNames} = getFnComponents(fn1);
     const sideData = R.zipObj(argNames, args);
     const input = [];
     const accum = {sideData, input}
@@ -22,7 +22,7 @@ const _sidepipe = (isAsync, fns) => {
         const {sideData, input} = accum;;
         //console.log('sidepipe: sideData:', sideData);
         //console.log('sidepipe: input:', input);
-        const [resName, fFn, argNames] = getFnComponents(fn);
+        const {resName, fFn, argNames} = getFnComponents(fn);
         const sideArgs = R.props(argNames, sideData);
         const allArgs = [...sideArgs, ...input];
         //console.log('sidepipe: allArgs:', allArgs);

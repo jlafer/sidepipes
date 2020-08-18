@@ -3,7 +3,7 @@ const getResultFnAndArgs = (fnArr) => {
   const fFn = fnArr[fnIdx];
   const resName = (fnIdx === 1) ? fnArr[0] : null;
   const argNames = fnArr.slice(fnIdx+1);
-  return [resName, fFn, argNames];
+  return {resName, fFn, argNames};
 };
 
 export const getFnComponents = (fn) => {
@@ -15,7 +15,7 @@ export const getFnComponents = (fn) => {
   }
   else {
     //console.log('getFnComponents: it is NOT an array');
-    result = [null, fn, []]
+    result = {resName: null, fFn: fn, argNames: []};
   }
   //console.log('getFnComponents: returning:', result);
   return result;

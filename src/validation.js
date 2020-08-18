@@ -14,24 +14,21 @@ const validateFnArrDataTypes = (accum, fnArr) => {
     return makeError('argument must contain a function in 1st or 2nd position', fnArr);
   if (R.any(notAFunctionOrString, fnArr))
     return makeError('argument must contain a function and only strings', fnArr);
-  const resName = (fnIdx === 1) ? fnArr[0] : null;
-  const fFn = fnArr[fnIdx];
-  const argNames = fnArr.slice(fnIdx+1);
-  const accumFns = [...accum.fns, {resName, fFn, argNames}];
-  return {fns: accumFns};
+  const fnComponents = getFnComponents(fnArr);
+  return {fns: [...accum.fns, fnComponents]};
 };
 
-const validateArgsDefinedBeforeUse = (accum, fnArr) => {
+const validateArgsDefinedBeforeUse = (accum, fnComponents) => {
   if (accum.ERROR)
     return accum;
   console.log('validateArgsDefinedBeforeUse: accum.args', accum.args);
-  console.log('validateArgsDefinedBeforeUse: fnArr', fnArr);
-  const undefinedArg = R.find(nameNotInArgs(accum.args), fnArr.argNames);
+  console.log('validateArgsDefinedBeforeUse: fnComponents', fnComponents);
+  const undefinedArg = R.find(nameNotInArgs(accum.args), fnComponents.argNames);
   console.log('validateArgsDefinedBeforeUse: undefinedArg', undefinedArg);
   if (undefinedArg)
-    return makeError(`${undefinedArg} is used before defined`, fnArr);
-  if (fnArr.resName) {
-    const accumArgs = [...accum.args, fnArr.resName];
+    return makeError(`${undefinedArg} is used before defined`, fnComponents);
+  if (fnComponents.resName) {
+    const accumArgs = [...accum.args, fnComponents.resName];
     return R.assoc('args', accumArgs, accum);
   }
   return accum;
@@ -40,8 +37,10 @@ const validateArgsDefinedBeforeUse = (accum, fnArr) => {
 const validateDataTypes = (accum, fn) => {
   if (accum.ERROR)
     return accum;
-  if (typeof fn == 'function')
-    return {fns: [...accum.fns, {resName: null, fFn: fn, argNames: []}]};
+  if (typeof fn == 'function') {
+    const fnComponents = getFnComponents(fn);
+    return {fns: [...accum.fns, fnComponents]};
+  }
   if (Array.isArray(fn))
     return validateFnArrDataTypes(accum, fn);
   else
