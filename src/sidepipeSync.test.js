@@ -41,3 +41,86 @@ test("sidepipeSync calculates correctly", () => {
   const myPipe = sidepipeSync(...pipeline);
   expect(myPipe(2, 3)).toEqual(8);
 });
+
+/* const _addFullName = (user) => {
+  const {first, last} = user;
+  const fullName = `${first} ${last}`;
+  return R.mergeRight(user, {fullName});
+}
+
+const assocWith = R.curry((key, fn, args, obj) => {
+  const props = R.props(args, obj);
+  const value = fn(...props);
+  return R.mergeRight(obj, {[key]: value});
+});
+
+const setFullName = assocWith(
+  'fullName',
+  (first, last) => `${first} ${last}`,
+  ['first', 'last']
+); */
+const _setFullName = R.converge(
+  R.assoc('fullName'),
+  [u => `${u.first} ${u.last}`, R.identity]
+);
+
+const assocWith = (key, fn) => R.converge(
+  R.assoc(key),
+  [fn, R.identity]
+);
+const setFullName = assocWith('fullName', u => `${u.first} ${u.last}`);
+
+const formatPhone = num => num.replace(/([0-9]{3})([0-9]{3})([0-9]{4})/, '($1)$2-$3');
+const formatPhoneNum = R.over(R.lensProp('phoneNum'), formatPhone);
+
+const minnie = {first: 'Minnie', last: 'Mouse', phoneNum: '8005551212'};
+const expectedMinnie = {first: 'Minnie', last: 'Mouse', fullName: 'Minnie Mouse', phoneNum: '(800)555-1212'};
+
+test("sidepipeSync calculates correctly", () => {
+  const myPipe = sidepipeSync(
+    setFullName,
+    formatPhoneNum
+  );
+  expect(myPipe(minnie)).toEqual(expectedMinnie);
+});
+
+const fallPromo = {
+  baseDiscount: 10, bStates: ['MA', 'AL', 'OH', 'KS', 'NV']
+};
+const mickey = {
+  firstName: 'Mickey', state: 'KS', nextProduct: 'WhizBang', discountAdjust: -5
+};
+
+const customerIncentive = (promo, customer) => {
+  const {baseDiscount, bStates} = promo;
+  const {nextProduct, discountAdjust} = customer;
+  return {product: nextProduct, discount: baseDiscount + discountAdjust, bStates};
+}
+
+const abTest = (customer, incentive) => ({
+  ...incentive,
+  rationale: incentive.bStates.includes(customer.state)
+    ? 'as a preferred customer'
+    : 'because you work hard for your money'
+});
+
+const personalize = (customer, incentive) => (
+  {...incentive, name: customer.firstName}
+);
+
+const format = (incentive) => {
+  const {name, rationale, discount, product} = incentive;
+  return `${name}, ${rationale}, take ${discount}% off your next ${product}!`
+};
+
+const expectedAd = 'Mickey, as a preferred customer, take 5% off your next WhizBang!';
+
+test("sidepipeSync calculates correctly", () => {
+  const makeAd = sidepipeSync(
+    [customerIncentive, 'promo', 'cust'],
+    [abTest, 'cust'],
+    [personalize, 'cust'],
+    format
+  );
+  expect(makeAd(fallPromo, mickey)).toEqual(expectedAd);
+});
