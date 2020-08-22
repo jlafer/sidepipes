@@ -1,6 +1,6 @@
 # sidepipes
 
-An experimental HOF for composing n-ary functions.
+Some experimental HOFs for composing n-ary functions.
 
 ## Description
 
@@ -20,7 +20,7 @@ f(fnArgs).then(fnToConsumeResults);
 ```
 ## Installation
 
-npm install --save jlafer-sidepipes
+npm install --save sidepipes
 
 ## Functions
 

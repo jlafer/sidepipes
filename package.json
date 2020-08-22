@@ -1,7 +1,7 @@
 {
   "name": "sidepipes",
-  "description": "An experimental HOF for composing n-ary functions",
-  "version": "0.0.2",
+  "description": "Some experimental HOFs for composing n-ary functions",
+  "version": "0.0.3",
   "main": "index.js",
   "repository": {
     "type": "git",
