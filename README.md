@@ -58,7 +58,7 @@ sidepipe :: [functionExpr] -> function
     sendGreeting
   );
 
-  getAndGreetUser('db', 'minnie'))
+  getAndGreetUser('db', 'minnie')
   .then(res => console.log(res))  // -> "greeting sent to user 1 over SMS"
 ```
 ### sidepipeSync(functionExprs)

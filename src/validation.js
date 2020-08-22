@@ -21,10 +21,10 @@ const validateFnArrDataTypes = (accum, fnArr) => {
 const validateArgsDefinedBeforeUse = (accum, fnComponents) => {
   if (accum.ERROR)
     return accum;
-  console.log('validateArgsDefinedBeforeUse: accum.args', accum.args);
-  console.log('validateArgsDefinedBeforeUse: fnComponents', fnComponents);
+  //console.log('validateArgsDefinedBeforeUse: accum.args', accum.args);
+  //console.log('validateArgsDefinedBeforeUse: fnComponents', fnComponents);
   const undefinedArg = R.find(nameNotInArgs(accum.args), fnComponents.argNames);
-  console.log('validateArgsDefinedBeforeUse: undefinedArg', undefinedArg);
+  //console.log('validateArgsDefinedBeforeUse: undefinedArg', undefinedArg);
   if (undefinedArg)
     return makeError(`${undefinedArg} is used before being defined`, fnComponents);
   if (fnComponents.resName) {
@@ -53,6 +53,6 @@ export const validate = (fns) => {
     return typeValidation;
   const fn1 = R.head(typeValidation.fns);
   const initialArgs = fn1.argNames;
-  console.log('validate: initialArgs:', initialArgs);
+  //console.log('validate: initialArgs:', initialArgs);
   return R.reduce(validateArgsDefinedBeforeUse, {args: initialArgs}, typeValidation.fns);
 };
