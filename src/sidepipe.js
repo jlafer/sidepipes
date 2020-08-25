@@ -2,6 +2,17 @@ import * as R from 'ramda';
 import {validate} from './validation';
 import {parsePipeSegment} from './helpers';
 
+const getAllArgsForfn = (fluid, argNames, idx) => {
+  const sideArgs = (idx == 0) ? [] : R.props(argNames, fluid.sideData);
+  return R.concat(sideArgs, fluid.pipeData);
+}
+
+const accumulateResultIntoFluid = (fluid, resName, result) => {
+  const {sideData} = fluid;
+  const newSideData = resName ? R.assoc(resName, result, sideData) : sideData;
+  return {sideData: newSideData, pipeData: [result]};
+};
+
 const _sidepipe = (isAsync, fns) => {
   const FN_NAME = isAsync ? 'sidepipe' : 'sidepipeSync';
   const validation = validate(fns);
@@ -17,15 +28,12 @@ const _sidepipe = (isAsync, fns) => {
     const fluid = {sideData: initialSideData, pipeData: args};
     return fns.reduce(
       (fluid, pipeSegment, idx) => {
-        const {sideData, pipeData} = fluid;;
         const {resName, fn, argNames} = parsePipeSegment(pipeSegment);
-        const sideArgs = (idx == 0) ? [] : R.props(argNames, sideData);
-        const allArgs = [...sideArgs, ...pipeData];
+        const allArgs = getAllArgsForfn(fluid, argNames, idx);
         const result = isAsync
           ? Promise.all(allArgs).then(args => fn(...args))
           : fn.call(null, ...allArgs);
-        const newSideData = resName ? R.assoc(resName, result, sideData) : sideData;
-        return {sideData: newSideData, pipeData: [result]};
+        return accumulateResultIntoFluid(fluid, resName, result);
       },
       fluid
     )['pipeData'][0];

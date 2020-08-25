@@ -21,14 +21,14 @@ const validateFnArrDataTypes = (accum, fnArr) => {
 const validateArgsDefinedBeforeUse = (accum, fnComponents) => {
   if (accum.ERROR)
     return accum;
-  //console.log('validateArgsDefinedBeforeUse: accum.args', accum.args);
-  //console.log('validateArgsDefinedBeforeUse: fnComponents', fnComponents);
-  const undefinedArg = R.find(nameNotInArgs(accum.args), fnComponents.argNames);
-  //console.log('validateArgsDefinedBeforeUse: undefinedArg', undefinedArg);
+  const {resName, fn, argNames} = fnComponents;
+  const undefinedArg = R.find(nameNotInArgs(accum.args), argNames);
   if (undefinedArg)
-    return makeError(`${undefinedArg} is used before being defined`, fnComponents);
-  if (fnComponents.resName) {
-    const accumArgs = [...accum.args, fnComponents.resName];
+    return makeError(`"${undefinedArg}" is used before being defined`, fnComponents);
+  if (resName) {
+    if (accum.args.includes(resName))
+      return makeError(`function result "${resName}" was previously named`, fnComponents);
+    const accumArgs = [...accum.args, resName];
     return R.assoc('args', accumArgs, accum);
   }
   return accum;
@@ -44,7 +44,7 @@ const validateDataTypes = (accum, pipeSegment) => {
   if (Array.isArray(pipeSegment))
     return validateFnArrDataTypes(accum, pipeSegment);
   else
-    return makeError('argument must be a function or array [ret, fn, args]:', pipeSegment);
+    return makeError('argument must be a function or array [res, fn, args]:', pipeSegment);
 };
 
 export const validate = (fns) => {
@@ -53,6 +53,5 @@ export const validate = (fns) => {
     return typeValidation;
   const fn1 = R.head(typeValidation.fns);
   const initialArgs = fn1.argNames;
-  //console.log('validate: initialArgs:', initialArgs);
   return R.reduce(validateArgsDefinedBeforeUse, {args: initialArgs}, typeValidation.fns);
 };

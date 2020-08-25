@@ -30,3 +30,11 @@ test("sidepipe validation returns error on arg that is used before defined", () 
   );
   expect(myPipe).toEqual(expect.objectContaining(validationError));
 });
+test("sidepipe validation returns error on res that is previously defined", () => {
+  const myPipe = sidepipe(
+    ['a', sum, 'x', 'y'],
+    [sum, 'x'],
+    ['a', double]
+  );
+  expect(myPipe).toEqual(expect.objectContaining(validationError));
+});
