@@ -21,7 +21,7 @@ const validateFnArrDataTypes = (accum, fnArr) => {
 const validateArgsDefinedBeforeUse = (accum, fnComponents) => {
   if (accum.ERROR)
     return accum;
-  const {resName, fn, argNames} = fnComponents;
+  const {resName, argNames} = fnComponents;
   const undefinedArg = R.find(nameNotInArgs(accum.args), argNames);
   if (undefinedArg)
     return makeError(`"${undefinedArg}" is used before being defined`, fnComponents);

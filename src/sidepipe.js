@@ -1,15 +1,14 @@
 import * as R from 'ramda';
 import {validate} from './validation';
-import {parsePipeSegment} from './helpers';
+import {assocMaybe, parsePipeSegment} from './helpers';
 
-const getAllArgsForfn = (fluid, argNames, idx) => {
+const getAllArgsForFn = (fluid, argNames, idx) => {
   const sideArgs = (idx == 0) ? [] : R.props(argNames, fluid.sideData);
   return R.concat(sideArgs, fluid.pipeData);
 }
 
 const accumulateResultIntoFluid = (fluid, resName, result) => {
-  const {sideData} = fluid;
-  const newSideData = resName ? R.assoc(resName, result, sideData) : sideData;
+  const newSideData = assocMaybe(resName, result, fluid.sideData);
   return {sideData: newSideData, pipeData: [result]};
 };
 
@@ -29,7 +28,7 @@ const _sidepipe = (isAsync, fns) => {
     return fns.reduce(
       (fluid, pipeSegment, idx) => {
         const {resName, fn, argNames} = parsePipeSegment(pipeSegment);
-        const allArgs = getAllArgsForfn(fluid, argNames, idx);
+        const allArgs = getAllArgsForFn(fluid, argNames, idx);
         const result = isAsync
           ? Promise.all(allArgs).then(args => fn(...args))
           : fn.call(null, ...allArgs);

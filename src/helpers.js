@@ -1,5 +1,7 @@
 import * as R from 'ramda';
 
+export const assocMaybe = (k, v, data) => k ? R.assoc(k, v, data) : data;
+
 const getResultFnAndArgs = (fnArr) => {
   const [resNameList, fnAndArgs] = R.splitWhen(item => typeof item === 'function', fnArr);
   const resName = R.head(resNameList);
